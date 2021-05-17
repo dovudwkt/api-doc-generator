@@ -1,42 +1,20 @@
-// Golang program to illustrate the
-// concept of text/templates
 package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"playground/templates/pkg/entity"
 	"text/template"
 )
 
-// get the json file names
-// open each file and append the content to the struct
-// open template and generate the file
-
-type Doc struct {
-	Title     string `json:"title,omitempty"`
-	Endpoints []struct {
-		EndpointName   string   `json:"endpoint_name,omitempty"`
-		Description    string   `json:"description,omitempty"`
-		Method         string   `json:"method,omitempty"`
-		URL            string   `json:"url,omitempty"`
-		RequestBody    string   `json:"request_body,omitempty"`
-		RequestFields  []Field  `json:"request_fields,omitempty"`
-		Params         []string `json:"params,omitempty"`
-		Response       string   `json:"response,omitempty"`
-		ResponseFields []Field  `json:"response_fields,omitempty"`
-	} `json:"endpoints,omitempty"`
+type Conf struct {
+	OutputPath string `json:"outputPath,omitempty"`
+	Entity     string `json:"entity,omitempty"`
 }
-type Field struct {
-	Field       string `json:"field,omitempty"`
-	Description string `json:"description,omitempty"`
-	Required    bool   `json:"required,omitempty"`
-}
-type Docs []Doc
 
 const (
 	dataPath     = "./data/"
@@ -44,130 +22,72 @@ const (
 )
 
 func main() {
-	var data Docs
-
-	// get data file names
-	entries, err := ioutil.ReadDir(dataPath)
+	folders, err := ioutil.ReadDir(dataPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, entry := range entries {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
+	for _, folder := range folders {
+		var data entity.ApplicationsDoc
+
+		if !folder.IsDir() {
 			continue
 		}
 
-		fn := filepath.Join(dataPath, entry.Name())
-		jsonFile, err := ioutil.ReadFile(fn)
+		fn := filepath.Join(dataPath, folder.Name(), "config.json")
+		confJSON, err := ioutil.ReadFile(fn)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(folder.Name() + " => ioutil.ReadFile => " + err.Error())
 		}
 
-		singleDoc := &Doc{}
-		err = json.Unmarshal(jsonFile, singleDoc)
+		config := &Conf{}
+		err = json.Unmarshal(confJSON, config)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(folder.Name() + " => json.Unmarshal => " + err.Error())
 		}
 
-		data = append(data, *singleDoc)
+		entries, err := ioutil.ReadDir(dataPath + folder.Name())
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, entry := range entries {
+			if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
+				continue
+			}
+
+			fn := filepath.Join(dataPath, folder.Name(), entry.Name())
+			jsonFile, err := ioutil.ReadFile(fn)
+			if err != nil {
+				log.Fatal(entry.Name() + " => ioutil.ReadFile => " + err.Error())
+			}
+
+			appDoc := &entity.ApplicationDoc{}
+			err = json.Unmarshal(jsonFile, appDoc)
+			if err != nil {
+				log.Fatal(entry.Name() + " => json.Unmarshal => " + err.Error())
+			}
+
+			data = append(data, *appDoc)
+		}
+
+		tpl := template.Must(template.New(templateFile).ParseFiles(templateFile))
+		generate(tpl, config.OutputPath, data)
 	}
-
-	tpl := template.Must(template.New(templateFile).ParseFiles(templateFile))
-
-	generateFile(tpl, "./out.md", data)
-
 }
 
-func generateFile(template *template.Template, outputFileName string, data interface{}) {
+func generate(template *template.Template, outputFileName string, data interface{}) {
 	os.MkdirAll(path.Dir(outputFileName), os.ModePerm)
 
 	outputFile, err := os.Create(outputFileName)
-	fmt.Println("Generating file : " + outputFileName)
-	defer outputFile.Close()
+	log.Println("Generating file: " + outputFileName)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(outputFileName + " => os.Create => " + err.Error())
 	}
+	defer outputFile.Close()
 
 	err = template.Execute(outputFile, data)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal("Execute => " + err.Error())
 	}
 }
-
-// ----------------------------v1----------------------------------------------------
-
-// type Doc struct {
-// 	Title     string `json:"title,omitempty"`
-// 	Endpoints []struct {
-// 		EndpointName   string   `json:"endpoint_name,omitempty"`
-// 		Description    string   `json:"description,omitempty"`
-// 		Method         string   `json:"method,omitempty"`
-// 		URL            string   `json:"url,omitempty"`
-// 		RequestBody    string   `json:"request_body,omitempty"`
-// 		RequestFields  []Field  `json:"request_fields,omitempty"`
-// 		Params         []string `json:"params,omitempty"`
-// 		Response       string   `json:"response,omitempty"`
-// 		ResponseFields []Field  `json:"response_fields,omitempty"`
-// 	} `json:"endpoints,omitempty"`
-// }
-
-// type Docs []Doc
-
-// type Field struct {
-// 	Field       string `json:"field,omitempty"`
-// 	Description string `json:"description,omitempty"`
-// 	Required    bool   `json:"required,omitempty"`
-// }
-
-// // main function
-// func main() {
-// 	var data Docs
-// 	fileName := "./data.json"
-
-// 	jsonFile, err := os.Open(fileName)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// 	defer jsonFile.Close()
-
-// 	fmt.Println("openning ", fileName, "...")
-// 	byteValue, err := ioutil.ReadAll(jsonFile)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-
-// 	err = json.Unmarshal(byteValue, &data)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-
-// 	tpl := template.Must(template.New("api-template.tpl").ParseFiles("api-template.tpl"))
-
-// 	generateFile(tpl, "./out.md", data)
-
-// }
-
-// func generateFile(template *template.Template, outputFileName string, data interface{}) {
-// 	os.MkdirAll(path.Dir(outputFileName), os.ModePerm)
-
-// 	outputFile, err := os.Create(outputFileName)
-// 	fmt.Println("Generating file : " + outputFileName)
-// 	defer outputFile.Close()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-
-// 	// --------------------------------
-// 	// outputFile, err := os.OpenFile(outputFileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-// 	// if err != nil {
-// 	// 	panic(err)
-// 	// }
-
-// 	// defer outputFile.Close()
-// 	// --------------------------------
-
-// 	err = template.Execute(outputFile, data)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// }

@@ -1,5 +1,4 @@
 {{range $data := .}}
----
 # {{$data.Title}}
 {{range $val := $data.Endpoints}}
 
