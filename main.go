@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"text/template"
 )
 
@@ -37,44 +38,41 @@ type Field struct {
 }
 type Docs []Doc
 
+const (
+	dataPath     = "./data/"
+	templateFile = "api-template.md"
+)
+
 func main() {
 	var data Docs
-	var fileNames []string
 
 	// get data file names
-	files, err := ioutil.ReadDir("./data")
+	entries, err := ioutil.ReadDir(dataPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// TODO: check extension to be json
-	for _, f := range files {
-		fileNames = append(fileNames, "./data/"+f.Name())
+
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
+			continue
+		}
+
+		fn := filepath.Join(dataPath, entry.Name())
+		jsonFile, err := ioutil.ReadFile(fn)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		singleDoc := &Doc{}
+		err = json.Unmarshal(jsonFile, singleDoc)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		data = append(data, *singleDoc)
 	}
 
-	for _, fileName := range fileNames {
-		var singleDoc Doc
-
-		jsonFile, err := os.Open(fileName)
-		if err != nil {
-			fmt.Println(err)
-		}
-		defer jsonFile.Close()
-
-		fmt.Println("openning ", fileName, "...")
-		byteValue, err := ioutil.ReadAll(jsonFile)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		err = json.Unmarshal(byteValue, &singleDoc)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		data = append(data, singleDoc)
-	}
-
-	tpl := template.Must(template.New("api-template.md").ParseFiles("api-template.md"))
+	tpl := template.Must(template.New(templateFile).ParseFiles(templateFile))
 
 	generateFile(tpl, "./out.md", data)
 
