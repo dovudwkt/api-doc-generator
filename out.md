@@ -1,28 +1,27 @@
 
+---
 # Condition
 
 
-<details><summary style="margin:3px"> 
-Search conditions
-</summary>
+<details><summary style="margin:3px"> Search conditions</summary>
+
 <p style="margin:10px">
-<span style="background-color:rgb(0, 122, 202); color:white; padding:2px"> 
-GET
-</span>
-<code> /v1/conditions </code>
+    <span style="background-color:rgb(0, 122, 202); color:white; padding:2px"> 
+        GET
+    </span>
+    <code> /v1/conditions </code>
 </p>
 
 ---
 
-### Query Parameters:
-`id` |
-`io_id` |
+### Query Parameters: `id` | `io_id` |
+
+
 
 
 
 
 ### Response
-
 ```json
 
 [
@@ -53,6 +52,7 @@ GET
 ]
 ```
 
+
 ### Response Fields: 
 | Field | Required | Description |
 | ------ | ------ | ------ |
@@ -61,31 +61,30 @@ GET
 
 
 </details>
-
 ---
 
 
+<details><summary style="margin:3px"> Save condition</summary>
 
-<details><summary style="margin:3px"> 
-Save condition
-</summary>
 <p style="margin:10px">
-<span style="background-color:rgb(0, 122, 202); color:white; padding:2px"> 
-POST
-</span>
-<code> /v1/conditions </code>
+    <span style="background-color:rgb(0, 122, 202); color:white; padding:2px"> 
+        POST
+    </span>
+    <code> /v1/conditions </code>
 </p>
 
 ---
 
 
-### Request Body Schema: 
+
+### ***Request Body Schema***: 
 ```json
 {
   "id": 123,
   "name": "Kale"
 }
 ```
+
 
 
 ### Request Fields: 
@@ -96,42 +95,39 @@ POST
 
 
 ### Response
-
 ```json
 {"status": 201, "message": "created"}
 ```
 
 
-</details>
 
+</details>
 ---
 
 
-
+---
 # RuleSet
 
 
-<details><summary style="margin:3px"> 
-Search Rulesets
-</summary>
+<details><summary style="margin:3px"> Search Rulesets</summary>
+
 <p style="margin:10px">
-<span style="background-color:rgb(0, 122, 202); color:white; padding:2px"> 
-GET
-</span>
-<code> /v1/conditions </code>
+    <span style="background-color:rgb(0, 122, 202); color:white; padding:2px"> 
+        GET
+    </span>
+    <code> /v1/conditions </code>
 </p>
 
 ---
 
-### Query Parameters:
-`id` |
-`io_id` |
+### Query Parameters: `id` | `io_id` |
+
+
 
 
 
 
 ### Response
-
 ```json
 
 [
@@ -162,6 +158,7 @@ GET
 ]
 ```
 
+
 ### Response Fields: 
 | Field | Required | Description |
 | ------ | ------ | ------ |
@@ -170,31 +167,30 @@ GET
 
 
 </details>
-
 ---
 
 
+<details><summary style="margin:3px"> Save RuleSet</summary>
 
-<details><summary style="margin:3px"> 
-Save RuleSet
-</summary>
 <p style="margin:10px">
-<span style="background-color:rgb(0, 122, 202); color:white; padding:2px"> 
-POST
-</span>
-<code> /v1/conditions </code>
+    <span style="background-color:rgb(0, 122, 202); color:white; padding:2px"> 
+        POST
+    </span>
+    <code> /v1/conditions </code>
 </p>
 
 ---
 
 
-### Request Body Schema: 
+
+### ***Request Body Schema***: 
 ```json
 {
   "id": 123,
   "name": "Kale"
 }
 ```
+
 
 
 ### Request Fields: 
@@ -205,14 +201,12 @@ POST
 
 
 ### Response
-
 ```json
 {"status": 201, "message": "created"}
 ```
 
 
+
 </details>
-
 ---
-
 
